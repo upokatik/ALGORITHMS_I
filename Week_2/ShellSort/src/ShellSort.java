@@ -2,9 +2,11 @@
  * Problem statement: Implement Shell sort.
  *
  * @author Dmitry Strebkov
- *         <p>
- *         Created by upokatik on 27.01.17.
+ * <p>
+ * Created by upokatik on 27.01.17.
  */
+
+import edu.princeton.cs.algs4.StdRandom;
 
 public class ShellSort {
 
@@ -29,6 +31,7 @@ public class ShellSort {
     public static void main(String[] args) {
         int[] array = new int[]{7, 10, 5, 3, 8, 4, 2, 9, 6};
 
+        StdRandom.shuffle(array);
         shellSort(array);
 
         for (int i = 1; i < array.length; ++i) {
