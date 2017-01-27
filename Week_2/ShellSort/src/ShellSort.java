@@ -16,23 +16,45 @@ public class ShellSort {
      * @param array an array to be sorted
      */
     private static void shellSort(int[] array) {
-        for (int i = 0; i < array.length; ++i) {
 
-            for (int j = i; j > 0; --j) {
-                if (array[j - 1] > array[j]) {
+        int N = array.length;
+        int h = 1;
+        while (h < N / 3) {
+            h = 3 * h;
+        }
+
+        // NOTE: Uncomment to cast Shell sort into Insertion sort
+        //h = 1;
+
+        for (; h >= 1; h /= 3) {
+
+            for (int i = h; i < N; ++i) {
+
+                for (int j = i; j >= h && array[j - h] > array[j]; j -= h) {
+
                     int temp = array[j];
-                    array[j] = array[j - 1];
-                    array[j - 1] = temp;
+                    array[j] = array[j - h];
+                    array[j - h] = temp;
+
                 }
+
             }
+
         }
     }
 
     public static void main(String[] args) {
-        int[] array = new int[]{7, 10, 5, 3, 8, 4, 2, 9, 6};
+        int[] array = new int[90000];
+        for (int i = 0; i < array.length; i++) {
+            array[i] = i + 1;
+        }
 
         StdRandom.shuffle(array);
+
+        long startTime = System.currentTimeMillis();
         shellSort(array);
+        long elapsedTime = System.currentTimeMillis() - startTime;
+        System.out.println("Time: " + elapsedTime / 1000.);
 
         for (int i = 1; i < array.length; ++i) {
             if (array[i] < array[i - 1]) {
