@@ -20,7 +20,7 @@ public class ShellSort {
         int N = array.length;
         int h = 1;
         while (h < N / 3) {
-            h = 3 * h;
+            h = 3 * h + 1;
         }
 
         // NOTE: Uncomment to cast Shell sort into Insertion sort
