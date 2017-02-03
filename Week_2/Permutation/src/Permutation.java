@@ -8,10 +8,28 @@
  * Created by upokatik on 02.02.17.
  */
 
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import edu.princeton.cs.algs4.Shell;
-import edu.princeton.cs.algs4.StdRandom;
 
 public class Permutation {
+
+    private static boolean isPermutation(Integer[] a, Integer[] b) {
+
+        if (a.length != b.length) {
+            return false;
+        }
+
+        Shell.sort(a);
+        Shell.sort(b);
+
+        for (int i = 0; i < a.length; ++i) {
+            if (!a[i].equals(b[i])) {
+                return false;
+            }
+        }
+
+        return true;
+    }
 
     /**
      * Helper function that performs a kind of unit testing
@@ -21,22 +39,67 @@ public class Permutation {
      * @param r expected result for the a[] and b[] intersection
      * @return true if resulting intersection is equal to r, false otherwise
      */
-    private static boolean verify(Integer[] a, Integer[] b, Integer[] r) {
+    private static boolean verify(Integer[] a, Integer[] b, boolean r) {
 
-        return true;
+        boolean result = isPermutation(a, b);
+
+        return result == r;
     }
 
     public static void main(String[] args) {
 
         Integer[] a = null;
         Integer[] b = null;
-        Integer[] r = null;
 
         // Test 1
         a = new Integer[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
-        b = new Integer[]{8, 8, 1, 2};
-        r = new Integer[]{1, 2, 8};
-        System.out.println(verify(a, b, r) ? "OK" : "FAIL");
+        b = new Integer[]{3, 1, 4, 6, 2, 8, 7, 5, 9, 0};
+        System.out.println(verify(a, b, true) ? "OK" : "FAIL");
+
+        // Test 2
+        a = new Integer[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+        b = new Integer[]{3, 1, 4, 6, 2, 8, 7, 5, 9, 5};
+        System.out.println(verify(a, b, false) ? "OK" : "FAIL");
+
+        // Test 3
+        a = new Integer[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+        b = new Integer[]{3, 1, 4, 6, 2, 8, 7, 5, 9};
+        System.out.println(verify(a, b, false) ? "OK" : "FAIL");
+
+        // Test 4
+        a = new Integer[]{0, 1, 2};
+        b = new Integer[]{0, 1, 2};
+        System.out.println(verify(a, b, true) ? "OK" : "FAIL");
+
+        // Test 5
+        a = new Integer[]{0, 0, 0};
+        b = new Integer[]{0, 0, 0};
+        System.out.println(verify(a, b, true) ? "OK" : "FAIL");
+
+        // Test 6
+        a = new Integer[]{-1, 0, 1};
+        b = new Integer[]{1, 0, 1};
+        System.out.println(verify(a, b, false) ? "OK" : "FAIL");
+
+        // Test 7
+        a = new Integer[]{};
+        b = new Integer[]{};
+        System.out.println(verify(a, b, true) ? "OK" : "FAIL");
+
+        // Test 8
+        a = new Integer[]{1, 1, 1, 1, -1};
+        b = new Integer[]{-1, 1, 1, 1, 1};
+        System.out.println(verify(a, b, true) ? "OK" : "FAIL");
+
+        // Test 9
+        a = new Integer[]{0, 2, 4, 0};
+        b = new Integer[]{2, 4, 0, 0};
+        System.out.println(verify(a, b, true) ? "OK" : "FAIL");
+
+        // Test 10
+        a = new Integer[]{0};
+        b = new Integer[]{0};
+        System.out.println(verify(a, b, true) ? "OK" : "FAIL");
 
         System.out.println("Done!");
     }
