@@ -8,11 +8,17 @@
  * Created by upokatik on 02.02.17.
  */
 
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import edu.princeton.cs.algs4.Shell;
 
 public class Permutation {
 
+    /**
+     * Perform a permutation check for two arrays
+     *
+     * @param a first input array
+     * @param b second input array
+     * @return true if sorted arrays a[] and b[] are element-wise equal, false otherwise
+     */
     private static boolean isPermutation(Integer[] a, Integer[] b) {
 
         if (a.length != b.length) {
@@ -36,8 +42,8 @@ public class Permutation {
      *
      * @param a first input array
      * @param b second input array
-     * @param r expected result for the a[] and b[] intersection
-     * @return true if resulting intersection is equal to r, false otherwise
+     * @param r expected result of the permutation check
+     * @return true if arrays represent a permutation, false otherwise
      */
     private static boolean verify(Integer[] a, Integer[] b, boolean r) {
 
