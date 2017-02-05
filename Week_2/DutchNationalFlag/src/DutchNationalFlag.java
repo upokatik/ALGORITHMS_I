@@ -17,8 +17,6 @@
 
 import edu.princeton.cs.algs4.StdRandom;
 
-import java.util.Arrays;
-
 public class DutchNationalFlag {
 
     enum Color {RED, WHITE, BLUE}
@@ -62,28 +60,42 @@ public class DutchNationalFlag {
      */
     Color[] turnColorsIntoFlag() {
 
-        System.out.println(Arrays.toString(colors));
+        int whiteStart = -1;
+        int blueStart = -1;
 
-        int blueIndex = 0;
-        int redIndex = colors.length - 1;
-        while (blueIndex < redIndex) {
-            if (color(blueIndex).equals(Color.RED)) {
-                ++blueIndex;
-            }
-            else if (color(blueIndex).equals(Color.BLUE)) {
-                swap(blueIndex, blueIndex + 1);
-            }
+        for (int i = 0; i < colors.length; ++i) {
+            switch (color(i)) {
+                case RED:
+                    if (whiteStart != -1) {
+                        swap(i, whiteStart++);
+                    }
+                    if (blueStart != -1) {
+                        swap(i, blueStart++);
+                    }
+                    break;
+                case WHITE:
+                    if (blueStart == -1 && whiteStart == -1) {
+                        whiteStart = i;
+                    } else if (blueStart != -1) {
+                        swap(i, blueStart);
 
-            if (!color(redIndex).equals(Color.RED)) {
-                --redIndex;
-            }
+                        if (whiteStart == -1) {
+                            whiteStart = blueStart;
+                        }
 
-            if (color(blueIndex).equals(Color.BLUE) && color(redIndex).equals(Color.RED)) {
-                swap(blueIndex++, redIndex--);
+                        ++blueStart;
+                    }
+
+                    break;
+                case BLUE:
+                    if (blueStart == -1) {
+                        blueStart = i;
+                    }
+                    break;
+                default:
+                    break;
             }
         }
-
-        System.out.println(Arrays.toString(colors));
 
         return colors;
     }
@@ -149,61 +161,57 @@ public class DutchNationalFlag {
 
         DutchNationalFlag flagFormatter = null;
         Color[] flag = null;
-/*
+
         // Test 1
         flagFormatter = new DutchNationalFlag(1);
         flag = flagFormatter.turnColorsIntoFlag();
         System.out.println(flagFormatter.verify(flag) ? "OK" : "FAIL");
-*/
+
         // Test 2
+        flagFormatter = new DutchNationalFlag(2);
+        flag = flagFormatter.turnColorsIntoFlag();
+        System.out.println(flagFormatter.verify(flag) ? "OK" : "FAIL");
+
+        // Test 3
         flagFormatter = new DutchNationalFlag(3);
         flag = flagFormatter.turnColorsIntoFlag();
         System.out.println(flagFormatter.verify(flag) ? "OK" : "FAIL");
 
-        if (!flagFormatter.verify(flag)) {
-            int err = 0;
-        }
-/*
-        // Test 3
+        // Test 4
         flagFormatter = new DutchNationalFlag(5);
         flag = flagFormatter.turnColorsIntoFlag();
         System.out.println(flagFormatter.verify(flag) ? "OK" : "FAIL");
 
-        // Test 4
+        // Test 5
         flagFormatter = new DutchNationalFlag(10);
         flag = flagFormatter.turnColorsIntoFlag();
         System.out.println(flagFormatter.verify(flag) ? "OK" : "FAIL");
 
-        // Test 5
+        // Test 6
         flagFormatter = new DutchNationalFlag(50);
         flag = flagFormatter.turnColorsIntoFlag();
         System.out.println(flagFormatter.verify(flag) ? "OK" : "FAIL");
 
-        // Test 6
-        flagFormatter = new DutchNationalFlag(100);
-        flag = flagFormatter.turnColorsIntoFlag();
-        System.out.println(flagFormatter.verify(flag) ? "OK" : "FAIL");
-
         // Test 7
-        flagFormatter = new DutchNationalFlag(1000);
+        flagFormatter = new DutchNationalFlag(500);
         flag = flagFormatter.turnColorsIntoFlag();
         System.out.println(flagFormatter.verify(flag) ? "OK" : "FAIL");
 
         // Test 8
-        flagFormatter = new DutchNationalFlag(10000);
+        flagFormatter = new DutchNationalFlag(1000);
         flag = flagFormatter.turnColorsIntoFlag();
         System.out.println(flagFormatter.verify(flag) ? "OK" : "FAIL");
 
         // Test 9
-        flagFormatter = new DutchNationalFlag(100000);
+        flagFormatter = new DutchNationalFlag(10000);
         flag = flagFormatter.turnColorsIntoFlag();
         System.out.println(flagFormatter.verify(flag) ? "OK" : "FAIL");
 
         // Test 10
-        flagFormatter = new DutchNationalFlag(1000000);
+        flagFormatter = new DutchNationalFlag(100000);
         flag = flagFormatter.turnColorsIntoFlag();
         System.out.println(flagFormatter.verify(flag) ? "OK" : "FAIL");
-*/
+
         System.out.println("Done!");
     }
 }
