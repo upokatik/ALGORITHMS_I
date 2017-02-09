@@ -3,7 +3,7 @@
  *
  * @author Dmitry Strebkov
  * <p>
- * Created by upokatik on 29.02.17.
+ * Created by upokatik on 09.02.17.
  */
 
 import edu.princeton.cs.algs4.StdRandom;
@@ -80,7 +80,7 @@ public class MergeSort {
     }
 
     public static void main(String[] args) {
-        int[] array = new int[10];
+        int[] array = new int[90000];
         for (int i = 0; i < array.length; i++) {
             array[i] = i + 1;
         }
