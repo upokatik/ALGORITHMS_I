@@ -3,7 +3,7 @@
  *
  * @author Dmitry Strebkov
  * <p>
- * Created by upokatik on 29.02.17.
+ * Created by upokatik on 09.02.17.
  */
 
 import edu.princeton.cs.algs4.StdRandom;
@@ -22,7 +22,23 @@ public class MergeSortBU {
      */
     private static void merge(int[] array, int[] aux, int low, int mid, int high) {
 
-        return;
+        for (int i = low; i <= high; ++i) {
+            aux[i] = array[i];
+        }
+
+        int i = low;
+        int j = mid + 1;
+        for (int k = low; k <= high; ++k) {
+            if (i > mid) {
+                array[k] = aux[j++];
+            } else if (j > high) {
+                array[k] = aux[i++];
+            } else if (aux[i] < aux[j]) {
+                array[k] = aux[i++];
+            } else {
+                array[k] = aux[j++];
+            }
+        }
     }
 
     /**
@@ -33,11 +49,25 @@ public class MergeSortBU {
     private static void mergeSortBU(int[] array) {
         int[] aux = new int[array.length];
 
+        for (int len = 1; len < array.length; len *= 2) {
+
+            for (int low = 0; low < array.length; low += 2 * len) {
+
+                int high = low + 2 * len - 1;
+                int mid = low + len - 1;
+                if (high >= array.length) {
+                    high = array.length - 1;
+                }
+
+                merge(array, aux, low, mid, high);
+            }
+        }
+
         return;
     }
 
     public static void main(String[] args) {
-        int[] array = new int[10];
+        int[] array = new int[100000];
         for (int i = 0; i < array.length; i++) {
             array[i] = i + 1;
         }
