@@ -17,6 +17,24 @@ public class Point implements Comparable<Point> {
     private final int x;     // x-coordinate of this point
     private final int y;     // y-coordinate of this point
 
+    class PointsSlopeOrderComp implements Comparator<Point> {
+
+        private Point originPoint;
+
+        PointsSlopeOrderComp(Point originPoint) {
+            this.originPoint = originPoint;
+        }
+
+        @Override
+        public int compare(Point p1, Point p2) {
+
+            double slope1 = originPoint.slopeTo(p1);
+            double slope2 = originPoint.slopeTo(p2);
+
+            return Double.compare(slope1, slope2);
+        }
+    }
+
     /**
      * Initializes a new point.
      *
@@ -104,8 +122,8 @@ public class Point implements Comparable<Point> {
      * @return the Comparator that defines this ordering on points
      */
     public Comparator<Point> slopeOrder() {
-        /* YOUR CODE HERE */
-        return null;
+
+        return new PointsSlopeOrderComp(this);
     }
 
 

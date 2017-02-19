@@ -15,6 +15,8 @@ import java.util.Comparator;
 
 public class FastCollinearPoints {
 
+    private static final int MIN_POINTS_PER_LINE = 4;
+
     private LineSegment[] lineSegments = null;
     private int lineSegmentsCount = 0;
 
@@ -36,6 +38,8 @@ public class FastCollinearPoints {
             Comparator<Point> comp = p.slopeOrder();
             Arrays.sort(points, comp);
             int err = 0;
+
+            fetchSegments(points, p, tempSegments);
         }
     }
 
@@ -55,6 +59,43 @@ public class FastCollinearPoints {
      */
     public LineSegment[] segments() {
         return lineSegments;
+    }
+
+    private int fetchSegments(Point[] points, Point point, LineSegment[] tempSegments) {
+
+        int lineSegmentsCount = 0;
+        int collinearPointsCount = 0;
+        Point[] collinearPoints = new Point[points.length];
+        double currentSlope = Double.NEGATIVE_INFINITY;
+
+        for (int i = 0; i < points.length; ++i) {
+            Point currentPoint = points[i];
+            if (currentPoint == point) {
+                continue;
+            }
+
+            double slope = point.slopeTo(currentPoint);
+            if (slope != currentSlope || currentSlope == Double.NEGATIVE_INFINITY) {
+
+                // New slope
+
+                if (collinearPointsCount >= MIN_POINTS_PER_LINE) {
+                    LineSegment segment = new LineSegment(collinearPoints[0], collinearPoints[collinearPointsCount - 1]);
+                    tempSegments[lineSegmentsCount++] = segment;
+                }
+
+                collinearPointsCount = 0;
+                collinearPoints[collinearPointsCount++] = currentPoint;
+                currentSlope = slope;
+            } else {
+
+                // Continuing with the same slope
+
+                collinearPoints[collinearPointsCount++] = currentPoint;
+            }
+        }
+
+        return lineSegmentsCount;
     }
 
     public static void main(String[] args) {
