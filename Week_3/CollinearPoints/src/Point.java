@@ -31,7 +31,12 @@ public class Point implements Comparable<Point> {
             double slope1 = originPoint.slopeTo(p1);
             double slope2 = originPoint.slopeTo(p2);
 
-            return Double.compare(slope1, slope2);
+            int comp = Double.compare(slope1, slope2);
+            if (comp != 0) {
+                return comp;
+            }
+
+            return p1.compareTo(p2);
         }
     }
 
@@ -110,9 +115,15 @@ public class Point implements Comparable<Point> {
     public int compareTo(Point that) {
         if (this.y != that.y) {
             return Integer.compare(this.y, that.y);
-        } else {
-            return Integer.compare(this.x, that.x);
         }
+
+        int comp = Integer.compare(this.x, that.x);
+
+        if (comp == 0) {
+            throw new IllegalArgumentException();
+        }
+
+        return comp;
     }
 
     /**

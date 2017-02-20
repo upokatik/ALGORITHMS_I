@@ -9,6 +9,7 @@
 import edu.princeton.cs.algs4.In;
 import edu.princeton.cs.algs4.StdDraw;
 import edu.princeton.cs.algs4.StdOut;
+import edu.princeton.cs.algs4.Queue;
 
 import java.util.Arrays;
 import java.util.Comparator;
@@ -18,7 +19,20 @@ public class FastCollinearPoints {
     private static final int MIN_POINTS_PER_LINE = 4;
 
     private LineSegment[] lineSegments = null;
-    private int lineSegmentsCount = 0;
+
+    private LineSegment[] tempSegments = null;
+    private LineSegmentMeta[] tempSegmentsMeta = null;
+    private int tempSegmentsCount = 0;
+
+    private class LineSegmentMeta {
+        double slope;
+        Point bottomLeftPoint;
+
+        LineSegmentMeta(double slope, Point bottomLeftPoint) {
+            this.slope = slope;
+            this.bottomLeftPoint = bottomLeftPoint;
+        }
+    }
 
     /**
      * Finds all line segments containing 4 or more points
@@ -30,16 +44,26 @@ public class FastCollinearPoints {
             throw new NullPointerException();
         }
 
-        LineSegment[] tempSegments = new LineSegment[points.length];
+        Queue<Point> queue = new Queue<>();
+        for (Point point : points) {
+            queue.enqueue(point);
+        }
 
-        for (int i = 0; i < points.length; ++i) {
-            Point p = points[i];
+        tempSegments = new LineSegment[points.length];
+        tempSegmentsMeta = new LineSegmentMeta[points.length];
+
+        while (!queue.isEmpty()) {
+            Point p = queue.dequeue();
 
             Comparator<Point> comp = p.slopeOrder();
             Arrays.sort(points, comp);
-            int err = 0;
 
-            fetchSegments(points, p, tempSegments);
+            fetchSegments(points, p);
+        }
+
+        lineSegments = new LineSegment[tempSegmentsCount];
+        for (int i = 0; i < tempSegmentsCount; ++i) {
+            lineSegments[i] = tempSegments[i];
         }
     }
 
@@ -49,7 +73,7 @@ public class FastCollinearPoints {
      * @return number of line segments
      */
     public int numberOfSegments() {
-        return lineSegmentsCount;
+        return lineSegments.length;
     }
 
     /**
@@ -61,41 +85,85 @@ public class FastCollinearPoints {
         return lineSegments;
     }
 
-    private int fetchSegments(Point[] points, Point point, LineSegment[] tempSegments) {
+    private void fetchSegments(Point[] points, Point originPoint) {
 
-        int lineSegmentsCount = 0;
-        int collinearPointsCount = 0;
         Point[] collinearPoints = new Point[points.length];
-        double currentSlope = Double.NEGATIVE_INFINITY;
+        int collinearPointsCount = 0;
 
-        for (int i = 0; i < points.length; ++i) {
+        collinearPoints[collinearPointsCount++] = originPoint;
+        double slope = Double.NEGATIVE_INFINITY;
+
+        for (int i = 1; i < points.length; ++i) {
+
             Point currentPoint = points[i];
-            if (currentPoint == point) {
-                continue;
-            }
 
-            double slope = point.slopeTo(currentPoint);
-            if (slope != currentSlope || currentSlope == Double.NEGATIVE_INFINITY) {
+            double newSlope = originPoint.slopeTo(currentPoint);
 
-                // New slope
-
-                if (collinearPointsCount >= MIN_POINTS_PER_LINE) {
-                    LineSegment segment = new LineSegment(collinearPoints[0], collinearPoints[collinearPointsCount - 1]);
-                    tempSegments[lineSegmentsCount++] = segment;
-                }
-
-                collinearPointsCount = 0;
-                collinearPoints[collinearPointsCount++] = currentPoint;
-                currentSlope = slope;
-            } else {
+            if (newSlope == slope) {
 
                 // Continuing with the same slope
-
                 collinearPoints[collinearPointsCount++] = currentPoint;
+
+            } else {
+
+                // New slope
+                handleLineSegmentCandidate(collinearPoints, collinearPointsCount, slope);
+
+                collinearPointsCount = 1;
+                collinearPoints[collinearPointsCount++] = currentPoint;
+                slope = newSlope;
             }
         }
 
-        return lineSegmentsCount;
+        // Check if collinearPoint form a line segment after last iteration
+        handleLineSegmentCandidate(collinearPoints, collinearPointsCount, slope);
+    }
+
+    private void handleLineSegmentCandidate(Point[] collinearPoints, int collinearPointsCount, double slope) {
+
+        if (collinearPointsCount >= MIN_POINTS_PER_LINE) {
+
+            Point first = collinearPoints[0];
+            Point second = collinearPoints[1];
+            Point last = collinearPoints[collinearPointsCount - 1];
+
+            Point segmentStart = first;
+            Point segmentEnd = last;
+
+            if (first.compareTo(second) > 0) {
+                segmentStart = second;
+            }
+            if (first.compareTo(last) > 0) {
+                segmentEnd = first;
+            }
+
+            if (isNewLineSegment(slope, segmentStart)) {
+
+                // Forming new line segment
+                LineSegment segment = new LineSegment(segmentStart, segmentEnd);
+                tempSegments[tempSegmentsCount] = segment;
+
+                LineSegmentMeta meta = new LineSegmentMeta(slope, segmentStart);
+                tempSegmentsMeta[tempSegmentsCount] = meta;
+
+                ++tempSegmentsCount;
+            }
+
+        }
+    }
+
+    private boolean isNewLineSegment(double slope, Point startPoint) {
+
+        for (int i = 0; i < tempSegmentsCount; ++i) {
+
+            LineSegmentMeta segmentMeta = tempSegmentsMeta[i];
+
+            if (segmentMeta.slope == slope && startPoint == segmentMeta.bottomLeftPoint) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     public static void main(String[] args) {
