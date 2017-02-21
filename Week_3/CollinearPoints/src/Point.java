@@ -17,7 +17,7 @@ public class Point implements Comparable<Point> {
     private final int x;     // x-coordinate of this point
     private final int y;     // y-coordinate of this point
 
-    class PointsSlopeOrderComp implements Comparator<Point> {
+    private class PointsSlopeOrderComp implements Comparator<Point> {
 
         private Point originPoint;
 
@@ -31,12 +31,7 @@ public class Point implements Comparable<Point> {
             double slope1 = originPoint.slopeTo(p1);
             double slope2 = originPoint.slopeTo(p2);
 
-            int comp = Double.compare(slope1, slope2);
-            if (comp != 0) {
-                return comp;
-            }
-
-            return p1.compareTo(p2);
+            return Double.compare(slope1, slope2);
         }
     }
 
@@ -83,6 +78,7 @@ public class Point implements Comparable<Point> {
      * @return the slope between this point and the specified point
      */
     public double slopeTo(Point that) {
+
         if (that.y == this.y && that.x == this.x) {
             // The same point
             return Double.NEGATIVE_INFINITY;
@@ -113,17 +109,12 @@ public class Point implements Comparable<Point> {
      * argument point
      */
     public int compareTo(Point that) {
+
         if (this.y != that.y) {
             return Integer.compare(this.y, that.y);
         }
 
-        int comp = Integer.compare(this.x, that.x);
-
-        if (comp == 0) {
-            throw new IllegalArgumentException();
-        }
-
-        return comp;
+        return Integer.compare(this.x, that.x);
     }
 
     /**
@@ -136,7 +127,6 @@ public class Point implements Comparable<Point> {
 
         return new PointsSlopeOrderComp(this);
     }
-
 
     /**
      * Returns a string representation of this point.

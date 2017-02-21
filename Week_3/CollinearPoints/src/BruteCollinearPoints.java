@@ -14,9 +14,7 @@ import java.util.Arrays;
 
 public class BruteCollinearPoints {
 
-    private static final int MIN_POINTS_PER_LINE = 4;
-
-    private LineSegment[] lineSegments = null;
+    private LineSegment[] tempSegments = null;
     private int lineSegmentsCount = 0;
 
     /**
@@ -25,24 +23,24 @@ public class BruteCollinearPoints {
      * @param points to be searched for line segments
      */
     public BruteCollinearPoints(Point[] points) {
-        if (points == null) {
-            throw new NullPointerException();
-        }
 
-        LineSegment[] tempSegments = new LineSegment[points.length];
+        Point[] pointsCopy = Arrays.copyOfRange(points, 0, points.length);
+        Arrays.sort(pointsCopy);
 
-        for (int i = 0; i < points.length; ++i) {
-            for (int j = i + 1; j < points.length; ++j) {
+        tempSegments = new LineSegment[pointsCopy.length];
 
-                if (0 == points[i].compareTo(points[j])) {
+        for (int i = 0; i < pointsCopy.length; ++i) {
+            for (int j = i + 1; j < pointsCopy.length; ++j) {
+
+                if (0 == pointsCopy[i].compareTo(pointsCopy[j])) {
                     throw new IllegalArgumentException();
                 }
 
-                for (int k = j + 1; k < points.length; ++k) {
-                    for (int l = k + 1; l < points.length; ++l) {
+                for (int k = j + 1; k < pointsCopy.length; ++k) {
+                    for (int l = k + 1; l < pointsCopy.length; ++l) {
 
-                        if (areCollinear(points[i], points[j], points[k], points[l])) {
-                            LineSegment segment = new LineSegment(points[i], points[l]);
+                        if (areCollinear(pointsCopy[i], pointsCopy[j], pointsCopy[k], pointsCopy[l])) {
+                            LineSegment segment = new LineSegment(pointsCopy[i], pointsCopy[l]);
                             tempSegments[lineSegmentsCount++] = segment;
                         }
 
@@ -50,9 +48,6 @@ public class BruteCollinearPoints {
                 }
             }
         }
-
-        lineSegments = new LineSegment[lineSegmentsCount];
-        lineSegments = Arrays.copyOfRange(tempSegments, 0, lineSegmentsCount);
     }
 
     /**
@@ -70,7 +65,7 @@ public class BruteCollinearPoints {
      * @return line segments
      */
     public LineSegment[] segments() {
-        return lineSegments;
+        return Arrays.copyOfRange(tempSegments, 0, lineSegmentsCount);
     }
 
     /**
@@ -88,7 +83,7 @@ public class BruteCollinearPoints {
         double acSlope = a.slopeTo(c);
         double adSlope = a.slopeTo(d);
 
-        return abSlope == acSlope && abSlope == adSlope;
+        return (0 == Double.compare(abSlope, acSlope)) && (0 == Double.compare(abSlope, adSlope));
     }
 
     public static void main(String[] args) {
