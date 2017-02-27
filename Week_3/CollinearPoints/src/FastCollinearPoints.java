@@ -17,20 +17,19 @@ public class FastCollinearPoints {
 
     private static final int MIN_POINTS_PER_LINE = 4;
 
-    private LineSegment[] tempSegments = null;
-    private LineSegmentMeta[] tempSegmentsMeta = null;
-    private int tempSegmentsCount = 0;
+    private LineSegmentMeta[] segmentsMeta = null;
+    private int segmentsMetaCount = 0;
 
     private Point[] sortedPoints = null;
-    private int[][] lineSegmentIndicesForPoints = null;
+    private int[][] segmentIndicesForPoints = null;
 
     private class LineSegmentMeta {
+        private LineSegment segment;
         private double slope;
-        private Point bottomLeftPoint;
 
-        LineSegmentMeta(double slope, Point bottomLeftPoint) {
+        LineSegmentMeta(LineSegment segment, double slope) {
+            this.segment = segment;
             this.slope = slope;
-            this.bottomLeftPoint = bottomLeftPoint;
         }
     }
 
@@ -41,19 +40,19 @@ public class FastCollinearPoints {
      */
     public FastCollinearPoints(Point[] points) {
 
-        Point[] pointsCopy = Arrays.copyOfRange(points, 0, points.length);
-
         sortedPoints = Arrays.copyOfRange(points, 0, points.length);
         Arrays.sort(sortedPoints);
-        lineSegmentIndicesForPoints = new int[points.length][points.length];
-        Arrays.fill(lineSegmentIndicesForPoints, null);
+
+        segmentIndicesForPoints = new int[points.length][points.length];
+        Arrays.fill(segmentIndicesForPoints, null);
+
+        Point[] pointsCopy = Arrays.copyOfRange(points, 0, points.length);
 
         int sqrt = (int) Math.sqrt((double) pointsCopy.length);
         final int dimension = 2 * sqrt * pointsCopy.length;
 
-        tempSegments = new LineSegment[dimension];
-        tempSegmentsMeta = new LineSegmentMeta[dimension];
-        tempSegmentsCount = 0;
+        segmentsMeta = new LineSegmentMeta[dimension];
+        segmentsMetaCount = 0;
 
         for (Point originPoint : points) {
 
@@ -70,7 +69,7 @@ public class FastCollinearPoints {
      * @return number of line segments
      */
     public int numberOfSegments() {
-        return tempSegmentsCount;
+        return segmentsMetaCount;
     }
 
     /**
@@ -80,14 +79,20 @@ public class FastCollinearPoints {
      */
     public LineSegment[] segments() {
 
-        LineSegment[] lineSegments = new LineSegment[tempSegmentsCount];
-        for (int i = 0; i < tempSegmentsCount; ++i) {
-            lineSegments[i] = tempSegments[i];
+        LineSegment[] lineSegments = new LineSegment[segmentsMetaCount];
+        for (int i = 0; i < segmentsMetaCount; ++i) {
+            lineSegments[i] = segmentsMeta[i].segment;
         }
 
         return lineSegments;
     }
 
+    /**
+     * Fetches line segments that correspond to the current origin point
+     *
+     * @param points      array of points sorted according to the "slope-with-the-origin" order
+     * @param originPoint an origin point
+     */
     private void fetchSegments(Point[] points, Point originPoint) {
 
         Point[] collinearPoints = new Point[points.length];
@@ -127,6 +132,15 @@ public class FastCollinearPoints {
         handleLineSegmentCandidate(collinearPoints, collinearPointsCount, slope);
     }
 
+    /**
+     * Handles a line segment candidate to determine if:
+     * - it contains enough points to represent a line segment (4+);
+     * - it's a line segment not met before
+     *
+     * @param collinearPoints      points that (probably!) represent a line segment
+     * @param collinearPointsCount count of points in "collinearPoints" array
+     * @param slope                slope between origin point and points from the "collinearPoints" array
+     */
     private void handleLineSegmentCandidate(Point[] collinearPoints, int collinearPointsCount, double slope) {
 
         if (collinearPointsCount >= MIN_POINTS_PER_LINE) {
@@ -139,45 +153,49 @@ public class FastCollinearPoints {
                 Arrays.sort(collinearPoints, 0, collinearPointsCount);
 
                 LineSegment segment = new LineSegment(collinearPoints[0], collinearPoints[collinearPointsCount - 1]);
-                tempSegments[tempSegmentsCount] = segment;
-
-                LineSegmentMeta meta = new LineSegmentMeta(slope, collinearPoints[0]);
-                tempSegmentsMeta[tempSegmentsCount] = meta;
+                segmentsMeta[segmentsMetaCount] = new LineSegmentMeta(segment, slope);
 
                 for (int i = 0; i < collinearPointsCount; ++i) {
 
                     pointIndex = Arrays.binarySearch(sortedPoints, collinearPoints[i]);
 
-                    int[] segmentsIndices = lineSegmentIndicesForPoints[pointIndex];
+                    int[] segmentsIndices = segmentIndicesForPoints[pointIndex];
                     if (segmentsIndices == null) {
-                        lineSegmentIndicesForPoints[pointIndex] = new int[1];
-                        lineSegmentIndicesForPoints[pointIndex][0] = tempSegmentsCount;
-                    }
-                    else {
+                        segmentIndicesForPoints[pointIndex] = new int[1];
+                        segmentIndicesForPoints[pointIndex][0] = segmentsMetaCount;
+                    } else {
                         int[] newSegmentIndices = new int[segmentsIndices.length + 1];
                         for (int j = 0; j < segmentsIndices.length; ++j) {
                             newSegmentIndices[j] = segmentsIndices[j];
                         }
-                        newSegmentIndices[segmentsIndices.length] = tempSegmentsCount;
-                        lineSegmentIndicesForPoints[pointIndex] = newSegmentIndices;
+                        newSegmentIndices[segmentsIndices.length] = segmentsMetaCount;
+                        segmentIndicesForPoints[pointIndex] = newSegmentIndices;
                     }
                 }
 
-                ++tempSegmentsCount;
+                ++segmentsMetaCount;
             }
         }
     }
 
+    /**
+     * Determines if there already was a line segment with a slope "slope" going through a point
+     * indexed as "pointIndex", or not
+     *
+     * @param slope      slope of the line between point indexed as "pointIndex" and origin point
+     * @param pointIndex index of the point
+     * @return true if there was no line segment from point indexed as "pointIndex" with slope "slope", false otherwise
+     */
     private boolean isNewLineSegment(double slope, int pointIndex) {
 
-        int[] segmentsIndices = lineSegmentIndicesForPoints[pointIndex];
+        int[] segmentsIndices = segmentIndicesForPoints[pointIndex];
         if (segmentsIndices == null) {
             return true;
         }
 
         for (int segmentIndex : segmentsIndices) {
 
-            LineSegmentMeta segmentMeta = tempSegmentsMeta[segmentIndex];
+            LineSegmentMeta segmentMeta = segmentsMeta[segmentIndex];
 
             if (0 == Double.compare(segmentMeta.slope, slope)) {
                 return false;
