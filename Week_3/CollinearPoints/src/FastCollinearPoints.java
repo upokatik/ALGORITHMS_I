@@ -21,6 +21,9 @@ public class FastCollinearPoints {
     private LineSegmentMeta[] tempSegmentsMeta = null;
     private int tempSegmentsCount = 0;
 
+    private Point[] sortedPoints = null;
+    private int[][] lineSegmentIndicesForPoints = null;
+
     private class LineSegmentMeta {
         private double slope;
         private Point bottomLeftPoint;
@@ -39,6 +42,11 @@ public class FastCollinearPoints {
     public FastCollinearPoints(Point[] points) {
 
         Point[] pointsCopy = Arrays.copyOfRange(points, 0, points.length);
+
+        sortedPoints = Arrays.copyOfRange(points, 0, points.length);
+        Arrays.sort(sortedPoints);
+        lineSegmentIndicesForPoints = new int[points.length][points.length];
+        Arrays.fill(lineSegmentIndicesForPoints, null);
 
         int sqrt = (int) Math.sqrt((double) pointsCopy.length);
         final int dimension = 2 * sqrt * pointsCopy.length;
@@ -123,29 +131,55 @@ public class FastCollinearPoints {
 
         if (collinearPointsCount >= MIN_POINTS_PER_LINE) {
 
-            Arrays.sort(collinearPoints, 0, collinearPointsCount);
+            int pointIndex = Arrays.binarySearch(sortedPoints, collinearPoints[0]);
 
-            if (isNewLineSegment(slope, collinearPoints[0])) {
+            if (isNewLineSegment(slope, pointIndex)) {
 
                 // Forming new line segment
+                Arrays.sort(collinearPoints, 0, collinearPointsCount);
+
                 LineSegment segment = new LineSegment(collinearPoints[0], collinearPoints[collinearPointsCount - 1]);
                 tempSegments[tempSegmentsCount] = segment;
 
                 LineSegmentMeta meta = new LineSegmentMeta(slope, collinearPoints[0]);
                 tempSegmentsMeta[tempSegmentsCount] = meta;
 
+                for (int i = 0; i < collinearPointsCount; ++i) {
+
+                    pointIndex = Arrays.binarySearch(sortedPoints, collinearPoints[i]);
+
+                    int[] segmentsIndices = lineSegmentIndicesForPoints[pointIndex];
+                    if (segmentsIndices == null) {
+                        lineSegmentIndicesForPoints[pointIndex] = new int[1];
+                        lineSegmentIndicesForPoints[pointIndex][0] = tempSegmentsCount;
+                    }
+                    else {
+                        int[] newSegmentIndices = new int[segmentsIndices.length + 1];
+                        for (int j = 0; j < segmentsIndices.length; ++j) {
+                            newSegmentIndices[j] = segmentsIndices[j];
+                        }
+                        newSegmentIndices[segmentsIndices.length] = tempSegmentsCount;
+                        lineSegmentIndicesForPoints[pointIndex] = newSegmentIndices;
+                    }
+                }
+
                 ++tempSegmentsCount;
             }
         }
     }
 
-    private boolean isNewLineSegment(double slope, Point startPoint) {
+    private boolean isNewLineSegment(double slope, int pointIndex) {
 
-        for (int i = 0; i < tempSegmentsCount; ++i) {
+        int[] segmentsIndices = lineSegmentIndicesForPoints[pointIndex];
+        if (segmentsIndices == null) {
+            return true;
+        }
 
-            LineSegmentMeta segmentMeta = tempSegmentsMeta[i];
+        for (int segmentIndex : segmentsIndices) {
 
-            if ((0 == Double.compare(segmentMeta.slope, slope)) && startPoint == segmentMeta.bottomLeftPoint) {
+            LineSegmentMeta segmentMeta = tempSegmentsMeta[segmentIndex];
+
+            if (0 == Double.compare(segmentMeta.slope, slope)) {
                 return false;
             }
         }
