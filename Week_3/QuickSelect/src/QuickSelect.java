@@ -6,7 +6,6 @@
  * Created by upokatik on 01.03.17.
  */
 
-import edu.princeton.cs.algs4.Particle;
 import edu.princeton.cs.algs4.StdRandom;
 
 public class QuickSelect {
