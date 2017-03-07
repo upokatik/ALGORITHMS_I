@@ -1,5 +1,3 @@
-import edu.princeton.cs.algs4.StdRandom;
-
 /**
  * Problem statement: Nuts and bolts.
  * A disorganized carpenter has a mixed pile of n nuts and n bolts.
@@ -7,9 +5,11 @@ import edu.princeton.cs.algs4.StdRandom;
  * Each nut fits exactly one bolt and each bolt fits exactly one nut.
  * By fitting a nut and a bolt together, the carpenter can see which one is bigger (but the carpenter cannot compare
  * two nuts or two bolts directly). Design an algorithm for the problem that uses nlogn compares (probabilistically).
- *
+ * <p>
  * Created by upokatik on 06.03.17.
  */
+
+import edu.princeton.cs.algs4.StdRandom;
 
 public class NutsAndBolts {
 
@@ -53,6 +53,7 @@ public class NutsAndBolts {
         int i = low;
         int j = high;
 
+        int pivot = 0;
         while (true) {
             while (i <= high && components[i].getSize() < size) {
                 ++i;
@@ -69,22 +70,43 @@ public class NutsAndBolts {
             components[i] = components[j];
             components[j] = temp;
 
-            i++;
-            j--;
+            if (components[i].getSize() == size) {
+                pivot = i;
+            }
+            if (components[j].getSize() == size) {
+                pivot = j;
+            }
+
+            ++i;
+            --j;
         }
 
-        return j;
+        if (pivot > i) {
+            Component temp = components[i];
+            components[i] = components[pivot];
+            components[pivot] = temp;
+            pivot = i;
+        }
+        else if (pivot < j) {
+            Component temp = components[j];
+            components[j] = components[pivot];
+            components[pivot] = temp;
+            pivot = j;
+        }
+
+        return pivot;
     }
 
     private static void sortNutsAndBolts(Nut[] nuts, Bolt[] bolts, int low, int high) {
-        while (low < high) {
+
+        if (low < high) {
             // Sorting nuts and determining pivot element index
-            char sizeOfBolt = Character.toLowerCase(bolts[low].getSize());
-            int pivot = partition(nuts, sizeOfBolt, low, high);
+            char boltSize = Character.toLowerCase(bolts[low].getSize());
+            int pivot = partition(nuts, boltSize, low, high);
 
             // Sorting bolts using size of pivot element calculated during sorting of nuts
-            char sizeOfNut = Character.toUpperCase(nuts[pivot].getSize());
-            pivot = partition(bolts, sizeOfNut, low, high);
+            char nutSize = Character.toUpperCase(nuts[pivot].getSize());
+            pivot = partition(bolts, nutSize, low, high);
 
             sortNutsAndBolts(nuts, bolts, low, pivot - 1);
             sortNutsAndBolts(nuts, bolts, pivot + 1, high);
@@ -102,8 +124,8 @@ public class NutsAndBolts {
         Bolt[] bolts = new Bolt[size];
 
         for (int i = 0; i < size; ++i) {
-            char nutSize = (char)('a' + i);
-            char boltSize = (char)('A' + i);
+            char nutSize = (char) ('a' + i);
+            char boltSize = (char) ('A' + i);
 
             nuts[i] = new Nut(nutSize);
             bolts[i] = new Bolt(boltSize);
@@ -123,8 +145,7 @@ public class NutsAndBolts {
             System.out.print(nuts[i].getSize() + "-" + bolts[i].getSize());
             if (i + 1 < size) {
                 System.out.print(", ");
-            }
-            else {
+            } else {
                 System.out.println();
             }
         }
