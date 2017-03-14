@@ -1,9 +1,5 @@
-import java.util.Comparator;
-
 /**
- * Problem statement: Counting inversions.
- * An inversion in an array a[] is a pair of entries a[i] and a[j] such that i<j, but a[i]>a[j].
- * Given an array, design a linearithmic algorithm to count the number of inversions.
+ * Problem statement: Implement Priority Queue based on Binary Heap data structure.
  *
  * @author Dmitry Strebkov
  *         <p>
@@ -16,9 +12,9 @@ public class PriorityQueue<Key extends Comparable<Key>> {
     private int N;
 
     /**
-     * Creates an instance of the priority queue.
+     * Creates an instance of the priority queue
      *
-     * @param capacity capacity of the priority queue being created.
+     * @param capacity capacity of the priority queue being created
      */
     public PriorityQueue(int capacity) {
         pq = (Key[]) new Comparable[capacity];
@@ -28,7 +24,7 @@ public class PriorityQueue<Key extends Comparable<Key>> {
     /**
      * Adds a key to the priority queue.
      *
-     * @param key a key to be added to the priority queue.
+     * @param key a key to be added to the priority queue
      */
     public void add(Key key) {
         pq[++N] = key;
@@ -36,16 +32,20 @@ public class PriorityQueue<Key extends Comparable<Key>> {
     }
 
     /**
-     * Removes the key with highest priority (max) from the priority queue.
+     * Removes the key with highest priority (max) from the priority queue
      *
-     * @return the key with highest priority that has been removed from the priority queue.
+     * @return the key with highest priority that has been removed from the priority queue
      */
     public Key delMax() {
-        return null;
+        exchange(1, N);
+        Key key = pq[N];
+        pq[N--] = null;
+        sink(1);
+        return key;
     }
 
     /**
-     * Helper functions that performs comparison of two keys using compareTo() method.
+     * Helper functions that performs comparison of two keys using compareTo() method
      *
      * @param key1 first key
      * @param key2 second key
@@ -68,10 +68,31 @@ public class PriorityQueue<Key extends Comparable<Key>> {
     }
 
     /**
-     * Helper functions that performs swapping of keys in two positions passed as parameters.
+     * Performs sinking-down operation for the key stored at index i
+     *
+     * @param i index of the key for sinking
+     */
+    private void sink(int i) {
+        int j = 2 * i;
+        while (j <= N) {
+            if (j < N && less(pq[j], pq[j + 1]) < 0) {
+                ++j;
+            }
+
+            if (less(pq[i], pq[j]) < 0) {
+                exchange(i, j);
+                i = j;
+            } else {
+                break;
+            }
+        }
+    }
+
+    /**
+     * Helper functions that performs swapping of keys in two positions passed as parameters
      *
      * @param i index of the first key for swapping
-     * @param j index of the second key for swapping*
+     * @param j index of the second key for swapping
      */
     private void exchange(int i, int j) {
         Key temp = pq[i];
@@ -90,6 +111,27 @@ public class PriorityQueue<Key extends Comparable<Key>> {
         priorityQueue.add(1);
         priorityQueue.add(3);
         priorityQueue.add(6);
+
+        Integer k1 = priorityQueue.delMax();
+        System.out.println(k1);
+
+        Integer k2 = priorityQueue.delMax();
+        System.out.println(k2);
+
+        Integer k3 = priorityQueue.delMax();
+        System.out.println(k3);
+
+        Integer k4 = priorityQueue.delMax();
+        System.out.println(k4);
+
+        Integer k5 = priorityQueue.delMax();
+        System.out.println(k5);
+
+        Integer k6 = priorityQueue.delMax();
+        System.out.println(k6);
+
+        Integer k7 = priorityQueue.delMax();
+        System.out.println(k7);
 
         System.out.println("OK!");
     }
