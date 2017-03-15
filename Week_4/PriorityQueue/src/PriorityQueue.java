@@ -2,9 +2,11 @@
  * Problem statement: Implement Priority Queue based on Binary Heap data structure.
  *
  * @author Dmitry Strebkov
- *         <p>
- *         Created by upokatik on 14.03.17.
+ * <p>
+ * Created by upokatik on 14.03.17.
  */
+
+import edu.princeton.cs.algs4.StdRandom;
 
 public class PriorityQueue<Key extends Comparable<Key>> {
 
@@ -17,7 +19,7 @@ public class PriorityQueue<Key extends Comparable<Key>> {
      * @param capacity capacity of the priority queue being created
      */
     public PriorityQueue(int capacity) {
-        pq = (Key[]) new Comparable[capacity];
+        pq = (Key[]) new Comparable[capacity + 1]; // + 1 for empty element at index 0
         N = 0;
     }
 
@@ -82,6 +84,7 @@ public class PriorityQueue<Key extends Comparable<Key>> {
             if (less(pq[i], pq[j]) < 0) {
                 exchange(i, j);
                 i = j;
+                j = 2 * i;
             } else {
                 break;
             }
@@ -102,36 +105,27 @@ public class PriorityQueue<Key extends Comparable<Key>> {
 
     public static void main(String[] args) {
 
-        PriorityQueue<Integer> priorityQueue = new PriorityQueue<>(8);
+        final int N = 100;
 
-        priorityQueue.add(4);
-        priorityQueue.add(5);
-        priorityQueue.add(7);
-        priorityQueue.add(2);
-        priorityQueue.add(1);
-        priorityQueue.add(3);
-        priorityQueue.add(6);
+        PriorityQueue<Integer> priorityQueue = new PriorityQueue<>(N);
+        int[] array = new int[N];
+        for (int i = 0; i < N; ++i) {
+            array[i] = i;
+        }
 
-        Integer k1 = priorityQueue.delMax();
-        System.out.println(k1);
+        StdRandom.shuffle(array);
 
-        Integer k2 = priorityQueue.delMax();
-        System.out.println(k2);
+        for (int i = 0; i < N; ++i) {
+            priorityQueue.add(array[i]);
+        }
 
-        Integer k3 = priorityQueue.delMax();
-        System.out.println(k3);
-
-        Integer k4 = priorityQueue.delMax();
-        System.out.println(k4);
-
-        Integer k5 = priorityQueue.delMax();
-        System.out.println(k5);
-
-        Integer k6 = priorityQueue.delMax();
-        System.out.println(k6);
-
-        Integer k7 = priorityQueue.delMax();
-        System.out.println(k7);
+        for (int i = 0; i < N; ++i) {
+            Integer key = priorityQueue.delMax();
+            if (key != N - i - 1) {
+                System.out.println("FAIL!");
+                return;
+            }
+        }
 
         System.out.println("OK!");
     }
