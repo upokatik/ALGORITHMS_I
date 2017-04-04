@@ -2,28 +2,27 @@
  * Created by upokatik on 21.03.17.
  */
 
-import edu.princeton.cs.algs4.*;
+import edu.princeton.cs.algs4.In;
+import edu.princeton.cs.algs4.LinkedStack;
+import edu.princeton.cs.algs4.MinPQ;
+import edu.princeton.cs.algs4.StdOut;
 
 public class Solver {
     private LinkedStack<Board> solution = null;
 
-    private class SearchNode implements Comparable {
+    private class SearchNode implements Comparable<SearchNode> {
         private Board board = null;
         private int moves;
-        private SearchNode successor = null;
+        private SearchNode predecessor = null;
 
-        SearchNode(Board board, int moves, SearchNode successor) {
+        SearchNode(Board board, int moves, SearchNode predecessor) {
             this.board = board;
             this.moves = moves;
-            this.successor = successor;
+            this.predecessor = predecessor;
         }
 
         @Override
-        public int compareTo(Object o) {
-            if (!(o instanceof SearchNode)) throw new IllegalArgumentException();
-
-            SearchNode other = (SearchNode) o;
-
+        public int compareTo(SearchNode other) {
             int thisPriority = this.board.manhattan() + this.moves;
             int otherPriority = other.board.manhattan() + other.moves;
 
@@ -46,9 +45,7 @@ public class Solver {
         twinsPQ.insert(new SearchNode(initial.twin(), 0, null));
 
         while (true) {
-
             // Handling initial board
-
             SearchNode searchNodeFromInitials = initialsPQ.delMin();
 
             if (searchNodeFromInitials.board.isGoal()) {
@@ -58,13 +55,14 @@ public class Solver {
 
             Iterable<Board> initialsNeighbors = searchNodeFromInitials.board.neighbors();
             for (Board neighbor : initialsNeighbors) {
-                SearchNode neighborSearchNode = new SearchNode(
-                        neighbor, searchNodeFromInitials.moves + 1, searchNodeFromInitials);
-                initialsPQ.insert(neighborSearchNode);
+                if (!isRepetitionBoard(neighbor, searchNodeFromInitials)) {
+                    SearchNode neighborSearchNode = new SearchNode(
+                            neighbor, searchNodeFromInitials.moves + 1, searchNodeFromInitials);
+                    initialsPQ.insert(neighborSearchNode);
+                }
             }
 
             // Handling twin board
-
             SearchNode searchNodeFromTwins = twinsPQ.delMin();
 
             if (searchNodeFromTwins.board.isGoal()) {
@@ -73,9 +71,12 @@ public class Solver {
 
             Iterable<Board> twinsNeighbors = searchNodeFromTwins.board.neighbors();
             for (Board neighbor : twinsNeighbors) {
-                SearchNode neighborSearchNode = new SearchNode(
-                        neighbor, searchNodeFromTwins.moves + 1, searchNodeFromTwins);
-                twinsPQ.insert(neighborSearchNode);
+                if (!isRepetitionBoard(neighbor, searchNodeFromTwins)) {
+                    SearchNode neighborSearchNode = new SearchNode(
+                            neighbor, searchNodeFromTwins.moves + 1, searchNodeFromTwins);
+                    twinsPQ.insert(neighborSearchNode);
+
+                }
             }
         }
     }
@@ -91,7 +92,7 @@ public class Solver {
             return -1;
         }
 
-        return solution.size();
+        return solution.size() - 1;
     }
 
     // sequence of boards in a shortest solution; null if unsolvable
@@ -102,10 +103,14 @@ public class Solver {
     private void formSolutionBySearchNode(SearchNode searchNodeFromInitials) {
         solution = new LinkedStack<>();
 
-        while (searchNodeFromInitials.successor != null) {
+        while (searchNodeFromInitials != null) {
             solution.push(searchNodeFromInitials.board);
-            searchNodeFromInitials = searchNodeFromInitials.successor;
+            searchNodeFromInitials = searchNodeFromInitials.predecessor;
         }
+    }
+
+    private boolean isRepetitionBoard(Board neighbor, SearchNode searchNode) {
+        return searchNode.predecessor != null && neighbor.equals(searchNode.predecessor.board);
     }
 
     // solve a slider puzzle (given below)

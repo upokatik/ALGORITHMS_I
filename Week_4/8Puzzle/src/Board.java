@@ -81,14 +81,16 @@ public class Board {
         Board twin = new Board(this.blocks);
 
         int row1, column1;
-
         do {
             row1 = StdRandom.uniform(twin.blocks.length);
             column1 = StdRandom.uniform(twin.blocks.length);
         } while (isZero(row1, column1));
 
-        int row2 = row1;
-        int column2 = column1 + 1 < dimension() ? column1 + 1 : column1 - 1;
+        int row2, column2;
+        do {
+            row2 = StdRandom.uniform(twin.blocks.length);
+            column2 = StdRandom.uniform(twin.blocks.length);
+        } while (isZero(row2, column2) || row2 == row1 && column2 == column1);
 
         Board.swapBlocks(twin, row1, column1, row2, column2);
         return twin;
@@ -96,11 +98,13 @@ public class Board {
 
     // does this board equal y?
     public boolean equals(Object y) {
-        if (!(y instanceof Board)) throw new IllegalArgumentException();
+        if (y == null || y.getClass() != this.getClass()) {
+            return false;
+        }
 
         Board other = (Board) y;
-
-        if (this.zeroRow != other.zeroRow || this.zeroColumn != other.zeroColumn) {
+        if (this.zeroRow != other.zeroRow || this.zeroColumn != other.zeroColumn ||
+                other.dimension() != this.dimension()) {
             return false;
         }
 
@@ -122,22 +126,26 @@ public class Board {
         if (zeroRow > 0) {
             Board neighborBoard = new Board(this.blocks);
             Board.swapBlocks(neighborBoard, zeroRow, zeroColumn, zeroRow - 1, zeroColumn);
+            neighborBoard.zeroRow--;
             neighborBoards.add(neighborBoard);
         }
         if (zeroRow + 1 < blocks.length) {
             Board neighborBoard = new Board(this.blocks);
             Board.swapBlocks(neighborBoard, zeroRow, zeroColumn, zeroRow + 1, zeroColumn);
+            neighborBoard.zeroRow++;
             neighborBoards.add(neighborBoard);
         }
 
         if (zeroColumn > 0) {
             Board neighborBoard = new Board(this.blocks);
             Board.swapBlocks(neighborBoard, zeroRow, zeroColumn, zeroRow, zeroColumn - 1);
+            neighborBoard.zeroColumn--;
             neighborBoards.add(neighborBoard);
         }
         if (zeroColumn + 1 < blocks.length) {
             Board neighborBoard = new Board(this.blocks);
             Board.swapBlocks(neighborBoard, zeroRow, zeroColumn, zeroRow, zeroColumn + 1);
+            neighborBoard.zeroColumn++;
             neighborBoards.add(neighborBoard);
         }
 
@@ -152,17 +160,15 @@ public class Board {
 
     // string representation of this board (in the output format specified below)
     public String toString() {
-        StringBuilder res = new StringBuilder();
-        for (int row = 0; row < dimension(); ++row) {
-            for (int column = 0; column < dimension(); ++column) {
-                res.append(blocks[row][column]);
-                if (column + 1 < blocks[row].length) {
-                    res.append(' ');
-                }
+        StringBuilder s = new StringBuilder();
+        s.append(dimension()).append("\n");
+        for (int i = 0; i < dimension(); i++) {
+            for (int j = 0; j < dimension(); j++) {
+                s.append(String.format("%2d ", blocks[i][j]));
             }
-            res.append('\n');
+            s.append("\n");
         }
-        return res.toString();
+        return s.toString();
     }
 
     private int targetRow(int row, int column) {
